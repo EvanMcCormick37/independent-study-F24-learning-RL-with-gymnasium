@@ -25,7 +25,7 @@ def moving_average(values, window, gaussian = False):
     # with the given weights array, it essentially takes the moving average of each N values in the values array.
     return np.convolve(values, kernel, "valid")
 
-def plot_results(log_folder, window = 1000, gaussian = False, title="Learning Curve"):
+def plot_results(log_folder, start = 0, stop = None, window = 1, gaussian = False, title="Learning Curve"):
     """
     plot the results
 
@@ -36,15 +36,20 @@ def plot_results(log_folder, window = 1000, gaussian = False, title="Learning Cu
 
     x, y = ts2xy(load_results(log_folder), "timesteps")
     y = moving_average(y, window = window, gaussian = gaussian)
+    
     # Truncate x
-    x = x[len(x) - len(y) :]
+    if stop is None:
+        stop = len(x)
+    x = x[(len(x) - len(y)) + start : stop]
+    
+    # Plot
     plt.plot(x,y)
     plt.xlabel("# of Training Timesteps")
     plt.ylabel("Mean Reward")
     plt.title(title + f"Smoothed, window-size = {window}")
     plt.show()
 
-def plot_multi(log_folders, labels, window = 1000, gaussian = False, title="Learning Curve "):
+def plot_multi(log_folders, labels, start = 0, stop = None, window = 1, gaussian = False, title="Learning Curve "):
     """
     plot the results
 
@@ -54,8 +59,11 @@ def plot_multi(log_folders, labels, window = 1000, gaussian = False, title="Lear
     for i, log_folder in enumerate(log_folders):
         x, y = ts2xy(load_results(log_folder), "timesteps")
         y = moving_average(y, window = window, gaussian = gaussian)
+        
         # Truncate x
-        x = x[len(x) - len(y) :]
+        if stop is None:
+            stop = len(x)
+        x = x[(len(x) - len(y)) + start : stop if stop < len(x) else len(x)]
         plt.plot(x,y, label = labels[i])
 
     plt.xlabel("# of Training Timesteps")
